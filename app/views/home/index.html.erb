@@ -1,4 +1,20 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.js"></script>
-<div>
-  <div id="editor" style="height: 600px"></div>
+<nav class="navbar navbar-light bg-faded">
+  <div class="navbar-brand">
+    Handsaw-Demo
+  </div>
+</nav>
+<div id="container">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6">
+        <editor editor-id="write-editor" content="" style="height: 600px" v-on:change-content="apply"></editor>
+      </div>
+      <div class="col-md-6">
+        <p>{{result}}</p>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+
