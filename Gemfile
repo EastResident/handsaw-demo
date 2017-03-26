@@ -35,6 +35,11 @@ gem 'jbuilder', '~> 2.5'
 # gem 'capistrano-rails', group: :development
 gem 'webpacker', github: 'rails/webpacker'
 
+gem 'redcarpet', '~> 3.3.4'
+
+gem 'html-pipeline', '~> 2.4.2'
+gem 'github-markdown'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -42,6 +47,8 @@ group :development, :test do
   gem 'capybara', '~> 2.13.0'
   gem 'selenium-webdriver'
   gem 'sqlite3'
+  gem 'pry-rails'
+  gem 'pry-byebug'
 end
 
 group :development do
