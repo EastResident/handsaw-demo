@@ -6,7 +6,7 @@ module Handsaw
     class DocParser < HTML::Pipeline::MarkdownFilter
       def call
         Nokogiri::HTML.fragment(
-          @text.split("\n\n").reduce([]) do |html, block|
+          @text.gsub(/^[ |　|\t]+$/, '').split("\n\n").reduce([]) do |html, block|
             html << block.indents.to_div
           end.join("\n")
         )

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Handsaw
   class CustomRender < Redcarpet::Render::HTML
     include ActionView::Helpers::TextHelper
