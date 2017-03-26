@@ -2,8 +2,8 @@
 module Handsaw
   class CustomRender < Redcarpet::Render::HTML
     include ActionView::Helpers::TextHelper
-    def paragraph(text)
-      simple_format(text, sanitize: false)
-    end
+    # def paragraph(text)
+    #   simple_format(text, sanitize: false)
+    # end
   end
 end

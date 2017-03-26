@@ -4,9 +4,9 @@ module Handsaw
     # そろそろ一括呼び出ししたい
     DEFAULT_FILTERS = [
       Handsaw::Filters::DocParser,
-      # Handsaw::Filters::Elements::Br,
+      Handsaw::Filters::Elements::Br,
       # Handsaw::Filters::BlockQuoteParser,
-      # Handsaw::Filters::SpanParser,
+      Handsaw::Filters::SpanParser,
       # Handsaw::Filters::LinkParser,
       Handsaw::Filters::Sanitizer
     ].freeze

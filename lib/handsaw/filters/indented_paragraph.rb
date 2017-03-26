@@ -5,7 +5,7 @@ module Handsaw
   module Filters
     class IndentedParagraph < HTML::Pipeline::Filter
       include ActionView::Helpers
-      include HtmlBuilder
+      include Handsaw::HtmlRender
       using Handsaw::HtmlRender
 
       def element_type

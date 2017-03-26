@@ -6,6 +6,7 @@
 
 # Ignore bundler config.
 /.bundle
+/vendor/bundle
 
 # Ignore the default SQLite database.
 /db/*.sqlite3
@@ -23,3 +24,7 @@
 .byebug_history
 /public/packs
 /node_modules
+
+# ctags
+/tags
+.DS_Store
