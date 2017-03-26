@@ -6,6 +6,7 @@
 
 import Vue from 'vue/dist/vue.esm'
 import App from './app.vue'
+const axios = require('axios')
 
 Vue.component('Editor', {
   template: '<div :id="editorId" style="width: 100%; height: 100%;"></div>',
@@ -14,6 +15,13 @@ Vue.component('Editor', {
     return {
       editor: Object,
       beforeContent: this.content
+    }
+  },
+  watch: {
+    'content' (value) {
+      if (this.beforeContent !== value) {
+        this.editor.setValue(value, 1)
+      }
     }
   },
   mounted () {   
@@ -39,21 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
         result: 'ここにプレビューが表示されます'
       }
     },
-    components: { App },
     methods: {
-      apply (val) {
-
-        // if (this.result !== val) {
-        //   $('#pre_article_markdown').val(val)
-        //   this.$http.post('/api/markdowns/to_html', { markdown: val }).then(response => {
-        //     this.result = response.body['html'];
-        //   }, response => {
-        //   });
-        // }
-        this.result = val
+      getChildText: function(text) {
+        axios.post('/api/handsaws/convert', {
+          handsaw: text
+        }).then(response => {
+          this.result = response.data['html'];
+        }).catch(error => {
+          console.log(error);
+        });        
       }
     }
   })
-
   console.log(app)
 })
