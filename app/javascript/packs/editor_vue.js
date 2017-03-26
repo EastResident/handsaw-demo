@@ -40,6 +40,7 @@ Vue.component('Editor', {
 })
 
 document.addEventListener('DOMContentLoaded', () => {
+  const csrf_token = document.getElementsByName('csrf-token').item(0).content;
   const app = new Vue({
     el: '#container',
     data () {
@@ -49,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     methods: {
       getChildText: function(text) {
-        axios.post('/api/handsaws/convert', {
-          handsaw: text
-        }).then(response => {
+        axios.post('/api/handsaws/convert',
+          { handsaw: text }, { headers: { 'X-CSRF-Token': csrf_token } }
+        ).then(response => {
           this.result = response.data['html'];
         }).catch(error => {
           console.log(error);
