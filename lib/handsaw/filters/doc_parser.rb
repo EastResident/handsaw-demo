@@ -4,62 +4,45 @@ require 'cgi'
 module Handsaw
   module Filters
     class DocParser < HTML::Pipeline::MarkdownFilter
+      using Handsaw::HtmlRender
       def call
         Nokogiri::HTML.fragment(
-          @text.gsub(/^[ |　|\t]+$/, '').split("\n\n").reduce([]) do |html, block|
-            html << block.indents.to_div
-          end.join("\n")
+          @text.gsub(/^[ |　|\t]+$/, '').gsub(/```\S*\n[^`]+```\n/m) { |w| w.to_html } # rubocop:disable SymbolProc
+               .split("\n\n").reduce([]) do |html, block|
+                 html << parse(block.concat("\nEOS"))
+               end.join("\n")
         )
       end
 
-      String.class_eval do
-        def indents # rubocop:disable all
-          blocks = []
-          count = 0
-          each_line.with_index do |line, index|
-            if key = line.rstrip.match(/^(\S+):$/).to_a[1]
-              count += 1 if index != 0
-              blocks[count] = { key: key, value: [] }
-            elsif hash_item = line.rstrip.match(/^(\w+[ \t\r\f]?:[ \t\r\f]?\S+)$/).to_a[1]
-              key, value = hash_item.split(':', 2).map(&:strip)
-              count += 1 if index != 0
-              blocks[count] = { key: 'option', value: ["#{key}:#{value}"] }
-            elsif value = line.rstrip.match(/^\s{2}(.+)$/).to_a[1]
-              blocks[count][:value] << value
+      def parse(text) # rubocop:disable all
+        block_size = text.split("\n").size
+        blocks = []
+        inner_blocks = []
+        key = nil
+        level = 0
+        text.each_line.with_index do |line, index|
+          if key
+            level = line.match(/^([ ]+).+$/).to_a[1].to_s.size if level.zero?
+            if line.rstrip =~ /^[ ]{#{level}}(\w+[ \t\r\f]?:[ \t\r\f]?\S+)$/
+              hash_item = line.rstrip.match(/^[ ]{#{level}}(\w+[ \t\r\f]?:[ \t\r\f]?\S+)$/).to_a[1]
+              o_key, o_value = hash_item.split(':', 2).map(&:strip)
+              inner_blocks << %(<div class="option">#{o_key}:#{o_value}</div>)
             else
-              count += 1 if index != 0
-              blocks[count] = { key: key, value: [line] }
+              inner_blocks << line.rstrip.match(/^[ ]{#{level}}(.+)$/).to_a[1]
             end
-          end
-          blocks.each_with_index do |block, index|
-            if block[:key] && (block[:key] != 'option')
-              blocks[index][:value] = block[:value].join("\n").indents
-            else blocks[index] = block[:value].join
+            if !line.rstrip.match(/^[ ]{#{level}}.+$/) || block_size == index + 1
+              blocks << %(<div class="#{key}">#{parse(inner_blocks.join("\n"))}</div>)
+              inner_blocks = []
+              level = 0
+              key = line.rstrip.match(/^(\S+):$/).to_a[1]
             end
+          elsif line.rstrip =~ /^(\S+):$/
+            key = line.rstrip.match(/^(\S+):$/).to_a[1]
+          else
+            blocks << line.rstrip.match(/^[ ]{#{level}}(.+)$/).to_a[1] unless line =~ /^\s$/ || line == 'EOS'
           end
         end
-      end
-
-      Array.class_eval do
-        include Handsaw::HtmlRender
-        using Handsaw::HtmlRender
-        def to_div
-          markup do |t|
-            if all? { |s| s.is_a?(String) && (s !~ /^\w+:\S+$/) }
-              t << join.to_html
-            else
-              each do |block|
-                if block.is_a?(Hash)
-                  t.div class: block[:key].to_s do
-                    t << block[:value].to_div
-                  end
-                else
-                  t.div block, class: 'option'
-                end
-              end
-            end
-          end
-        end
+        blocks.join("\n").to_html.strip
       end
     end
   end
