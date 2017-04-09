@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el: '#container',
     data () {
       return {
-        result: 'ここにプレビューが表示されます'
+        result: 'Preview'
       }
     },
     methods: {

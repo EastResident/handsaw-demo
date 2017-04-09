@@ -7,7 +7,7 @@ module Handsaw
       # Handsaw::Filters::BlockQuoteParser,
       Handsaw::Filters::BrParser,
       Handsaw::Filters::SpanParser,
-      # Handsaw::Filters::LinkParser,
+      Handsaw::Filters::LinkParser,
       Handsaw::Filters::Sanitizer
     ].freeze
     attr_accessor :context
