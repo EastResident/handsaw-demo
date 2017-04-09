@@ -2,9 +2,9 @@
 
 Handsawは現在開発中の軽量マークアップ言語で、以下のような特徴を持っています。
 
-1. markdownとslimに影響を受けたシンタックス
-2. Rubyでの実装
-3. 独自の記法を容易に定義可能
+* markdownとslimに影響を受けたシンタックス
+* Rubyでの実装
+* 独自の記法を容易に定義可能
 
 以下のデモサイトで、基本的な変換ルールを確認することができます。
 
@@ -141,56 +141,7 @@ end
 
 `option: value`の形式を用いることで、Ruby側にインスタンス変数として値を渡すことができる。インデントされたブロックの中で、さらにインデントしてブロックを作成した場合、そのブロック以下の要素は`@value`としてまとめて取得する。上記の例だと、`comment:`以下の部分がhtmlに変換された上で`@value`に代入される。
 
-# 目次要素
-
-`# title`形式の見出しは、全て目次に表示される。目次に表示しない見出しを作成する場合は、`#: title`の形式を用いる。`# title`と`#: title`形式は、目次へ表示されるかの有無以外は、基本的に同一。
-
-サンプル
-
-```md:変換前
-# 見出し1
-
-サンプルテキスト
-
-#: 見出し1.5(目次に表示されない)
-
-- list1
-- list2
-
-# 見出し2
-
-div:
-  indented text
-
-# 見出し3
-```
-
-```html:変換後
-<div class="table_contents">
-  <p class="table_contents_heading">目次</p>
-  <div class="table_contents_inner">
-    <ul>
-      <li><a href="#head-1"><strong>見出し1</strong></a></li>
-      <li><a href="#head-2"><strong>見出し2</strong></a></li>
-      <li><a href="#head-3"><strong>見出し3</strong></a></li>
-    </ul>
-  </div>
-</div>
-<h2 class="heading" id="head-1">見出し1</h2>
-<p class="text">サンプルテキスト</p>
-<h2 class="heading">見出し1.5(目次に表示されない)</h2>
-<ul>
-  <li>list1</li>
-  <li>list2</li>
-</ul>
-<h2 class="heading" id="head-2">見出し2</h2>
-<div class="div">
-  <p class="text">indented text</p>
-</div>
-<h2 class="heading" id="head-3">見出し3</h2>
-```
-
-# 改行
+## 改行
 
 ```md
 {br}
