@@ -1,181 +1,76 @@
-# Handsaw-Demo
+# Handsaw
+Handsaw is a new lightweight markup language made in Ruby, and has the following features.
 
-Handsawは現在開発中の軽量マークアップ言語で、以下のような特徴を持っています。
+* Its syntax is affected by markdown and slim.
+* Implemented in Ruby.
+* Easy to define your own notation.
 
-* markdownとslimに影響を受けたシンタックス
-* Rubyでの実装
-* 独自の記法を容易に定義可能
-
-以下のデモサイトで、基本的な変換ルールを確認することができます。
+You can check basic conversion rules on the demo site below.
 
 [Handsaw-Demo](https://ancient-anchorage-59376.herokuapp.com/)
 
-## インデントの展開
+## Installation
+Add this line to your application's Gemfile:
 
-基本的に`word:`の形式でインデントされるものは、class付きのdivとして展開される。`word:`形式でインデントされた内側の要素は、基本的にはMarkdownと同様に展開される。
-
-```md:変換前
-checkpoint:
-  title:
-    タイトル
-  description
-    説明文
-  list:
-    - 項目1
-    - 項目2
+```ruby
+gem 'handsaw', github: 'PORT-INC/handsaw'
 ```
 
-```html:変換後
-<div class="checkpoint">
-  <div class="title">
-    <p>タイトル</p>
-  </div>
-  <div class="description">
-    <p>説明文</p>
-  </div>
-  <div class="list">
-    <ul>
-      <li>項目1</li>
-      <li>項目2</li>
-    </ul>
-  </div>
-</div>
+And then execute:
+```bash
+$ bundle
 ```
 
-## インライン要素の展開
+# Usage
 
-`{classname: テキスト}`の形式はspanタグに変換される。
+## Summary
 
-例
+### 1. Define the `processor` to convert your DSL
 
-```md:変換前
-title:
-  これが{red: タイトル}です
+Define your own processor to convert the DSL under `app/processors`.
+Your processor has to inherit `Handsaw::BaseProcessor` and its class name must be in the format `XXXXProcessor`.
 
-list:
-  - {blue: リスト1}だよ
-  - {yellow: リスト2}だよ
-```
+#### example
 
-```html:変換後
-<div class="title">
-  <p>これが<span class="red">タイトル</span>です</p>
-</div>
-<div class="list">
-  <ul>
-    <li><span class="blue">リスト1</span>だよ</li>
-    <li><span class="yellow">リスト2</span>だよ</li>
-  </ul>
-</div>
-```
-
-## クラス付きのリンク
-
-`[class: リンクテキスト](URL)`の形式で、クラス付きのaタグに展開することができる。
-
-```md
-[red: リンクテキスト](URL)
-```
-
-```html:変換後
-<a href="URL" class="red">リンクテキスト</a>
-```
-
-## オプションの受け渡し
-
-`option:value`の形式で、Rails側に値を渡すことができる。
-
-```md
-checkpoint:
-  title: タイトル
-  list:
-    - list1
-    - list2
-```
-
-ここで詳細な説明は省くが、上記の例だとRails側の処理で`@title = 'タイトル'`がインスタンス変数として使用可能になるので、メソッド内でこの値を処理可能になる。
-
-## 独自記法の定義
-
-例として、リンクとコメントのついた画像要素を定義する。
-
-以下のような記法を作成する場合を考える。
-
-```md:変換前
-image:
-  path: 画像のパス
-  href: 画像についているリンク
-  alt: 画像のaltテキスト
-  comment:
-    画像に関しての説明やコメント
-```
-
-```html:変換後
-<div>
-  <a href="画像のリンク">
-    <img src="画像のパス" alt="画像のaltテキスト">
-  </a>
-  <div>
-    <p>画像に関しての説明やコメント</p>
-  </div>
-</div>
-```
-
-この記法を定義するには、`Handsaw::Filters::IndentedParagraph`を継承した`Image`クラスを作成する。
-
-```rb:image.rb
-class Image < Handsaw::Filters::IndentedParagraph
+```rb:app/processors/article_processor.rb
+class ArticleProcessor < Handsaw::BaseProcessor
 end
 ```
 
-そして、`Image`クラスの定義ファイルと同じ階層に`templates`フォルダを作成し、その中に`image.html.erb`ファイルを作成して変換後のhtmlを書くことになる。
+### 2. Convert DSL using your defined `processor`
 
-```html:templates:imge.html.erb
-<div>
-  <%= link_to(@href) do %>
-    <%= image_tag(@path, alt: @alt) %>
-  <% end %>
-  @value
-</div>
-```
+```rb
+processor = ArticleProcessor.new
 
-`option: value`の形式を用いることで、Ruby側にインスタンス変数として値を渡すことができる。インデントされたブロックの中で、さらにインデントしてブロックを作成した場合、そのブロック以下の要素は`@value`としてまとめて取得する。上記の例だと、`comment:`以下の部分がhtmlに変換された上で`@value`に代入される。
-
-## 改行
-
-```md
-{br}
-```
-
-## 注意点
-
-インデント表現の`word:`形式の文字を、他の形式の文字と同じ階層に書いてはいけない。
-
-これはアウト
-
-```md:ダメな例
-topclass:
-  text:
-  sample text
-    list:
-  - list1
-  - list2
-```
-
-通常のマークダウンでも同様だが、複数のHTML要素を改行なしで並べても正常に展開できない。
-
-```md:ダメな例
-topclass:
-  sample text
-  - list1
-  - list2
-```
-
-オプション記法とインデント記法は同じ階層に書くことができるが、オプション記法と通常のmarkdown記法を同じ階層に書くことはできない。
-
-```md:ダメな例
+text =<<EOS
 checkpoint:
-  title: タイトル
-  - list1
-  - list2
+  title:
+    TITLE
+  message:
+    MESSAGE
+
+{red: decorated_text}
+
+[blue: decorated_link_label](link)
+EOS
+
+processor.render text
 ```
+
+```html
+<div class="pa-checkBox" style="">
+  <div class="pa-checkBox__content">
+    <div class="title"><p class="pa-text">TITLE</p></div>
+    <div class="message"><p class="pa-text">MESSAGE</p></div>
+  </div>
+</div>
+
+<p class="pa-text"><span class="red">decorated_text</span></p>
+<p class="pa-text"><a href="link" class="blue">decorated_link_label</a></p>
+```
+
+## Contributing
+Contribution directions go here.
+
+## License
+The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
